@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_audio_recorder/flutter_audio_recorder.dart';
 import 'dart:async';
 
 import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:record/record.dart';
 
 // import 'package:path_provider/path_provider.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
@@ -161,61 +162,66 @@ class _CallingPageViewState extends State<CallingPageView> {
                           ),
                           trailing: IconButton(
                               onPressed: () async {
-                                final directory =
-                                    await getExternalStorageDirectories();
-                                // print("test reco" + directory.toString());
+                                bool result = await Record().hasPermission();
 
-                                FlutterPhoneDirectCaller.callNumber(e)
-                                    .then((value) async {
-                                  var recorder = FlutterAudioRecorder(
-                                      directory.first.path.toString() +
-                                          '/' +
-                                          e.toString() +
-                                          '_' +
-                                          DateTime.now().toLocal().toString() +
-                                          '.m4a');
-                                  await recorder.initialized;
-                                  await recorder.start();
-                                  var recording =
-                                      await recorder.current(channel: 0);
+                                if (result) {
+                                  final directory =
+                                      await getExternalStorageDirectories();
+                                  // print("test reco" + directory.toString());
 
-                                  // await Record()
-                                  //     .start(
-                                  //       path: directory!.first.path.toString() +
-                                  //           '/' +
-                                  //           e.toString() +
-                                  //           '_' +
-                                  //           DateTime.now()
-                                  //               .toLocal()
-                                  //               .toString() +
-                                  //           '.m4a', // required
-                                  //       encoder: AudioEncoder.AAC, // by default
-                                  //       bitRate: 128000, // by default
-                                  //       samplingRate: 44100, // by default
-                                  //     )
-                                  //     .then((value) => Fluttertoast.showToast(
-                                  //         msg: "Call Recording Start...",
-                                  //         toastLength: Toast.LENGTH_SHORT,
-                                  //         gravity: ToastGravity.CENTER,
-                                  //         timeInSecForIosWeb: 1,
-                                  //         backgroundColor: Colors.grey,
-                                  //         textColor: Colors.white,
-                                  //         fontSize: 16.0));
+                                  FlutterPhoneDirectCaller.callNumber(e)
+                                      .then((value) async {
+                                    // var recorder = FlutterAudioRecorder(
+                                    //     directory.first.path.toString() +
+                                    //         '/' +
+                                    //         e.toString() +
+                                    //         '_' +
+                                    //         DateTime.now().toLocal().toString() +
+                                    //         '.m4a');
+                                    // await recorder.initialized;
+                                    // await recorder.start();
+                                    // var recording =
+                                    //     await recorder.current(channel: 0);
 
-                                  Timer(const Duration(seconds: 10), () async {
-                                    var result = await recorder.stop();
+                                    await Record()
+                                        .start(
+                                          path:
+                                              directory!.first.path.toString() +
+                                                  '/' +
+                                                  e.toString() +
+                                                  '_' +
+                                                  DateTime.now()
+                                                      .toLocal()
+                                                      .toString() +
+                                                  '.m4a', // required
+                                          encoder:
+                                              AudioEncoder.AAC, // by default
+                                          bitRate: 128000, // by default
+                                          samplingRate: 44100, // by default
+                                        )
+                                        .then((value) => Fluttertoast.showToast(
+                                            msg: "Call Recording Start...",
+                                            toastLength: Toast.LENGTH_SHORT,
+                                            gravity: ToastGravity.CENTER,
+                                            timeInSecForIosWeb: 1,
+                                            backgroundColor: Colors.grey,
+                                            textColor: Colors.white,
+                                            fontSize: 16.0));
+
+                                    Timer(const Duration(seconds: 10),
+                                        () async {
+                                      await Record().stop().then((value) =>
+                                          Fluttertoast.showToast(
+                                              msg: "Call Recording End...",
+                                              toastLength: Toast.LENGTH_SHORT,
+                                              gravity: ToastGravity.CENTER,
+                                              timeInSecForIosWeb: 1,
+                                              backgroundColor: Colors.grey,
+                                              textColor: Colors.white,
+                                              fontSize: 16.0));
+                                    });
                                   });
-
-                                  // await Record().stop().then((value) =>
-                                  //     Fluttertoast.showToast(
-                                  //         msg: "Call Recording End...",
-                                  //         toastLength: Toast.LENGTH_SHORT,
-                                  //         gravity: ToastGravity.CENTER,
-                                  //         timeInSecForIosWeb: 1,
-                                  //         backgroundColor: Colors.grey,
-                                  //         textColor: Colors.white,
-                                  //         fontSize: 16.0));
-                                });
+                                }
                               },
                               icon: const Icon(
                                 Icons.call,
